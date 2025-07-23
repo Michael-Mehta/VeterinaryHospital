@@ -34,9 +34,10 @@ class Pets(models.Model):
     species = models.CharField(max_length=255, blank=True, null=True)
     age = models.SmallIntegerField(blank=True, null=True)
     owner = models.ForeignKey(Owners, on_delete=models.CASCADE, blank=True, null=True)
+    image = models.ImageField(upload_to='pet_images/', blank=True, null=True)
 
     class Meta:
-        managed = False
+        
         db_table = 'pets'
 
 

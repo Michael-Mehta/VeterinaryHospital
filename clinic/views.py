@@ -26,22 +26,30 @@ def return_all_pets(request):
 
 def create_pet(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
+        name = request.POST.get('name')
+        species = request.POST.get('species')
+        age = request.POST.get('age')
+        owner_id = request.POST.get('owner_id')
+        image = request.FILES.get('image')  
+
         pet = Pets.objects.create(
-            name = data['name'],
-            species = data.get('species'), #entering a species is optional so this will return null/none if it isn't found
-            age = data.get('age'),
-            owner_id = data.get('owner_id') #django is smart, even though it says owner in the model, it knows what I want
+            name=name,
+            species=species,
+            age=age,
+            owner_id=owner_id,
+            image=image
         )
+
         return JsonResponse({
-            "id":pet.id,
-            "name":pet.name,
-            "species":pet.species,
-            "age":pet.age,
-            "owner_id":pet.owner_id
+            "id": pet.id,
+            "name": pet.name,
+            "species": pet.species,
+            "age": pet.age,
+            "owner_id": pet.owner_id,
+            "image": pet.image.url if pet.image else None  
         })
-    else:
-        return HttpResponse('This is a POST only endpoint!', status = 405)
+
+    return HttpResponse('This is a POST only endpoint!', status=405)
     
 
 def delete_pet(request, pet_id):
@@ -57,32 +65,37 @@ def delete_pet(request, pet_id):
 
 def update_pet(request, pet_id):
     if request.method == 'PATCH':
-        pet = get_object_or_404(Pets, pk = pet_id)
-        data = json.loads(request.body)
+        pet = get_object_or_404(Pets, pk=pet_id)
 
-        if 'name' in data:
-            pet.name = data['name']
+        name = request.POST.get('name')
+        species = request.POST.get('species')
+        age = request.POST.get('age')
+        owner_id = request.POST.get('owner_id')
+        image = request.FILES.get('image')
 
-        if 'species' in data:
-            pet.species = data['species']
-
-        if 'age' in data:
-            pet.age = data['age']
-        
-        if 'owner_id' in data:
-            pet.owner_id = data['owner_id']
+        if name is not None:
+            pet.name = name
+        if species is not None:
+            pet.species = species
+        if age is not None:
+            pet.age = age
+        if owner_id is not None:
+            pet.owner_id = owner_id
+        if image is not None:
+            pet.image = image
 
         pet.save()
 
         return JsonResponse({
-            "id":pet.id,
-            "name":pet.name,
-            "species":pet.species,
-            "age":pet.age,
-            "owner_id":pet.owner_id
+            "id": pet.id,
+            "name": pet.name,
+            "species": pet.species,
+            "age": pet.age,
+            "owner_id": pet.owner_id,
+            "image": pet.image.url if pet.image else None,
         })
-    else:
-        return HttpResponse('This is a PATCH only endpoint!', status = 405)
+
+    return HttpResponse("This is a PATCH only endpoint!", status=405)
 
 
 
@@ -148,7 +161,8 @@ def return_all_pets_by_owner(request, owner_id):
            "id":pet.id,
            "name":pet.name,
            "species":pet.species,
-           "age":pet.age
+           "age":pet.age,
+           "image":pet.image
         })
 
     return JsonResponse({
