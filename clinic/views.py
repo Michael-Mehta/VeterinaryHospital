@@ -4,6 +4,26 @@ from django.shortcuts import get_object_or_404
 import json
 # Create your views here.
 
+def return_all_pets(request):
+    pets =  Pets.objects.all()
+   
+
+    pets_serialized = []
+
+    for pet in pets:
+        pets_serialized.append({
+           "id":pet.id,
+           "name":pet.name,
+           "species":pet.species,
+           "age":pet.age,
+           "owner_id":pet.owner.id
+           
+        })
+
+
+    print(pets_serialized)
+    return JsonResponse(pets_serialized, safe = False)
+
 def create_pet(request):
     if request.method == 'POST':
         data = json.loads(request.body)

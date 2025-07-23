@@ -11,6 +11,7 @@ urlpatterns = [
     #GET
     path('owners/', return_all_owners),
     path('owners/<int:owner_id>/pets/', return_all_pets_by_owner),
+    path('pets/all/', return_all_pets),
 
     #POST
     path('owners/create/', create_owner),
