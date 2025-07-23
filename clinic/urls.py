@@ -23,6 +23,9 @@ urlpatterns = [
 
     #PATCH
     path('owners/update/<int:owner_id>/', update_owner),
+
+
+    #PUT only because I am using images here and form-data works better with PUT requests
     path('pet/update/<int:pet_id>/', update_pet)
 
     

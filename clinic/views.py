@@ -1,7 +1,11 @@
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 from .models import *
 from django.shortcuts import get_object_or_404
 import json
+
+
+
+
 # Create your views here.
 
 def return_all_pets(request):
@@ -16,7 +20,8 @@ def return_all_pets(request):
            "name":pet.name,
            "species":pet.species,
            "age":pet.age,
-           "owner_id":pet.owner.id
+           "owner_id":pet.owner.id,
+           "image":pet.image.url
            
         })
 
@@ -63,39 +68,46 @@ def delete_pet(request, pet_id):
         return HttpResponse('This is a DELETE only endpoint!', status = 405)
     
 
+
 def update_pet(request, pet_id):
-    if request.method == 'PATCH':
-        pet = get_object_or_404(Pets, pk=pet_id)
+    if request.method != 'PUT':
+        return HttpResponseNotAllowed(['PUT'])
 
-        name = request.POST.get('name')
-        species = request.POST.get('species')
-        age = request.POST.get('age')
-        owner_id = request.POST.get('owner_id')
-        image = request.FILES.get('image')
+    # Manually read the body and parse it as multipart
+    # Required because Django only parses multipart for POST
+    if 'multipart/form-data' in request.content_type:
+        # Need to manually parse the body
+        from django.http.multipartparser import MultiPartParser, MultiPartParserError
 
-        if name is not None:
-            pet.name = name
-        if species is not None:
-            pet.species = species
-        if age is not None:
-            pet.age = age
-        if owner_id is not None:
-            pet.owner_id = owner_id
-        if image is not None:
-            pet.image = image
+        try:
+            parser = MultiPartParser(request.META, request, request.upload_handlers)
+            data, files = parser.parse()
+        except MultiPartParserError as e:
+            return JsonResponse({'error': str(e)}, status=400)
 
-        pet.save()
+    else:
+        return JsonResponse({'error': 'Unsupported content type'}, status=400)
 
-        return JsonResponse({
-            "id": pet.id,
-            "name": pet.name,
-            "species": pet.species,
-            "age": pet.age,
-            "owner_id": pet.owner_id,
-            "image": pet.image.url if pet.image else None,
-        })
+    pet = get_object_or_404(Pets, pk=pet_id)
 
-    return HttpResponse("This is a PATCH only endpoint!", status=405)
+    pet.name = data.get('name', pet.name)
+    pet.species = data.get('species', pet.species)
+    pet.age = data.get('age', pet.age)
+    pet.owner_id = data.get('owner_id', pet.owner_id)
+
+    if 'image' in files:
+        pet.image = files['image']
+
+    pet.save()
+
+    return JsonResponse({
+        "id": pet.id,
+        "name": pet.name,
+        "species": pet.species,
+        "age": pet.age,
+        "owner_id": pet.owner_id,
+        "image": pet.image.url if pet.image else None,
+    })
 
 
 
