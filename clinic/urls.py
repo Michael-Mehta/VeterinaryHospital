@@ -12,10 +12,12 @@ urlpatterns = [
     path('owners/', return_all_owners),
     path('owners/<int:owner_id>/pets/', return_all_pets_by_owner),
     path('pets/all/', return_all_pets),
+    path('vets/all/', return_all_vets),
 
     #POST
     path('owners/create/', create_owner),
     path('pets/create/', create_pet),
+    path('vets/create/', create_vet),
 
     #DELETE
     path('owners/delete/<int:owner_id>/', delete_owner),
@@ -26,7 +28,8 @@ urlpatterns = [
 
 
     #PUT only because I am using images here and form-data works better with PUT requests
-    path('pet/update/<int:pet_id>/', update_pet)
+    path('pet/update/<int:pet_id>/', update_pet),
+    path('vet/update/<int:vet_id>/', update_vet)
 
     
 ]

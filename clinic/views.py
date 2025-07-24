@@ -7,6 +7,83 @@ import json
 
 
 # Create your views here.
+def update_vet(request, vet_id):
+    if request.method != 'PUT':
+        return HttpResponseNotAllowed(['PUT'])
+
+    # Manually read the body and parse it as multipart
+    # Required because Django only parses multipart for POST
+    if 'multipart/form-data' in request.content_type:
+        # Need to manually parse the body
+        from django.http.multipartparser import MultiPartParser, MultiPartParserError
+
+        try:
+            parser = MultiPartParser(request.META, request, request.upload_handlers)
+            data, files = parser.parse()
+        except MultiPartParserError as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    else:
+        return JsonResponse({'error': 'Unsupported content type'}, status=400)
+
+    vet = get_object_or_404(Pets, pk=vet_id)
+
+    vet.name = data.get('name', vet.name)
+    vet.specialization = data.get('specialization', vet.specialization)
+
+    if 'image' in files:
+        vet.image = files['image']
+
+    vet.save()
+
+    return JsonResponse({
+        "id": vet.id,
+        "name": vet.name,
+        "specialization": vet.specialization,
+        "image": vet.image.url if vet.image else None,
+    })
+
+
+
+def create_vet(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        specialization = request.POST.get('specialization')
+        image = request.FILES.get('image')  
+
+        vet = Vets.objects.create(
+            name=name,
+            specialization=specialization,
+            image=image
+        )
+
+        return JsonResponse({
+            "id": vet.id,
+            "name": vet.name,
+            "specialization": vet.specialization,
+            "image": vet.image.url if vet.image else None  
+        })
+
+    return HttpResponse('This is a POST only endpoint!', status=405)
+
+def return_all_vets(request):
+    vets =  Vets.objects.all()
+   
+
+    vets_serialized = []
+
+    for vet in vets:
+        vets_serialized.append({
+           "id":vet.id,
+           "name":vet.name,
+           "specialization":vet.specialization,
+           "image":vet.image.url
+           
+        })
+
+
+    print(vets_serialized)
+    return JsonResponse(vets_serialized, safe = False)
 
 def return_all_pets(request):
     pets =  Pets.objects.all()

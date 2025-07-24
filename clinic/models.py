@@ -14,7 +14,7 @@ class Owners(models.Model):
     phone = models.CharField(max_length=255)
 
     class Meta:
-        managed = False
+        
         db_table = 'owners'
 
 
@@ -22,9 +22,10 @@ class Vets(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255)
     specialization = models.CharField(max_length=255, blank=True, null=True)
+    image = models.ImageField(upload_to='vet_images/', blank=True, null=True)
 
     class Meta:
-        managed = False
+        
         db_table = 'vets'
 
 
@@ -48,7 +49,7 @@ class Appointments(models.Model):
     vet = models.ForeignKey(Vets, models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
-        managed = False
+        
         db_table = 'appointments'
 
 
@@ -59,7 +60,7 @@ class Vaccines(models.Model):
     description = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        
         db_table = 'vaccines'
 
 
@@ -70,5 +71,5 @@ class PetVaccines(models.Model):
     time_of_vaccination = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        
         db_table = 'pet_vaccines'
