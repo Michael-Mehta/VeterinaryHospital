@@ -22,6 +22,7 @@ urlpatterns = [
     #DELETE
     path('owners/delete/<int:owner_id>/', delete_owner),
     path('pets/delete/<int:pet_id>/', delete_pet),
+    path('vets/delete/<int:vet_id>/', delete_vet),
 
     #PATCH
     path('owners/update/<int:owner_id>/', update_owner),

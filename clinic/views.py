@@ -7,6 +7,18 @@ import json
 
 
 # Create your views here.
+
+def delete_vet(request, vet_id):
+    if request.method == 'DELETE':
+        vet = get_object_or_404(Vets, pk = vet_id)
+
+        vet.delete()
+        return HttpResponse(f'Vet with id: {vet_id} was deleted', status = 200)
+
+    else:
+        return HttpResponse('This is a DELETE only endpoint!', status = 405)
+    
+
 def update_vet(request, vet_id):
     if request.method != 'PUT':
         return HttpResponseNotAllowed(['PUT'])
