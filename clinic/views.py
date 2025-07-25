@@ -7,6 +7,75 @@ import json
 
 
 # Create your views here.
+def return_all_appointments(request):
+    appointments = Appointments.objects.all()
+   
+
+    appointments_serialized = []
+
+    for appointment in appointments:
+        appointments_serialized.append({
+           "id":appointment.id,
+           "date":appointment.date,
+           "pet":appointment.pet.id,
+           "vet":appointment.vet.id
+        })
+
+
+    print(appointments_serialized)
+    return JsonResponse(appointments_serialized, safe = False)
+
+def create_appointment(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        appointment = Appointments.objects.create(
+            date = data['date'],
+            pet = data['pet'],
+            vet = data['vet']
+        )
+        return JsonResponse({
+            "id":appointment.id,
+            "date":appointment.date,
+            "vet":appointment.vet
+        })
+    else:
+        return HttpResponse('This is a POST only endpoint!', status = 405)
+    
+def update_appointment(request, appointment_id):
+    if request.method == 'PATCH':
+        appointment = get_object_or_404(Appointments, pk = appointment_id)
+        data = json.loads(request.body)
+
+        if 'date' in data:
+            appointment.date = data['date']
+
+        if 'pet' in data:
+            appointment.pet = data['pet']
+        
+        if 'vet' in data:
+            appointment.vet = data['vet']
+
+        appointment.save()
+
+        return JsonResponse({
+            "id":appointment.id,
+            "date":appointment.date,
+            "pet":appointment.pet.id,
+            "vet":appointment.vet.id
+        })
+    else:
+        return HttpResponse('This is a PATCH only endpoint!', status = 405)
+    
+def delete_appointment(request, appointment_id):
+    if request.method == 'DELETE':
+        appointment = get_object_or_404(Appointments, pk = appointment_id)
+
+        appointment.delete()
+        return HttpResponse(f'Appointment with id: {appointment_id} was deleted', status = 200)
+
+    else:
+        return HttpResponse('This is a DELETE only endpoint!', status = 405)
+    
 
 def delete_vet(request, vet_id):
     if request.method == 'DELETE':
