@@ -28,32 +28,44 @@ def return_all_appointments(request):
 def create_appointment(request):
     if request.method == 'POST':
         data = json.loads(request.body)
+
+        pet_instance = get_object_or_404(Pets, id = data['pet'])
+        vet_instance = get_object_or_404(Vets, id = data['vet'])
+
+
         appointment = Appointments.objects.create(
             date = data['date'],
-            pet = data['pet'],
-            vet = data['vet']
+            pet = pet_instance,
+            vet = vet_instance
         )
         return JsonResponse({
             "id":appointment.id,
             "date":appointment.date,
-            "vet":appointment.vet
+            "pet":appointment.pet.id,
+            "vet":appointment.vet.id
         })
     else:
         return HttpResponse('This is a POST only endpoint!', status = 405)
     
 def update_appointment(request, appointment_id):
     if request.method == 'PATCH':
+
         appointment = get_object_or_404(Appointments, pk = appointment_id)
+        
+        
+
         data = json.loads(request.body)
 
         if 'date' in data:
             appointment.date = data['date']
 
         if 'pet' in data:
-            appointment.pet = data['pet']
+            pet_instance = get_object_or_404(Pets, id = data['pet'])
+            appointment.pet = pet_instance
         
         if 'vet' in data:
-            appointment.vet = data['vet']
+            vet_instance = get_object_or_404(Vets, id = data['vet'])
+            appointment.vet = vet_instance
 
         appointment.save()
 
